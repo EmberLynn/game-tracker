@@ -4,6 +4,7 @@
 package Application;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -18,6 +19,8 @@ public class MainApp {
 	static final String USER = "root";
 	static final String PASS = "password";
 
+	public static Statement stmt;
+	
 	/**
 	 * @param args
 	 */
@@ -42,12 +45,15 @@ public class MainApp {
 		 * -list total times for all game entered
 		 * 
 		 * */
+		
+		//database connection
 		Connection conn = null;
 		try 
 		{
 			Class.forName(JDBC_DRIVER);
 			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 			System.out.println("Connection success!\n");
+			stmt = conn.createStatement();
 			
 		}catch(SQLException se)
 		{
@@ -59,7 +65,7 @@ public class MainApp {
 			e.printStackTrace();
 		} 
 	
-		
+		//main menu
 		Scanner input = new Scanner(System.in);
 		int selection = 0;
 		
@@ -90,11 +96,13 @@ public class MainApp {
 		input.close();
 	}
 	
+	//menu for adding and choosing games
 	public static void gameMenu() 
 	{
 		Scanner input = new Scanner(System.in);
 		int selection = 0;
-		//String gameName;
+		ArrayList<String> gameList =  new ArrayList<String>();
+		String gameName;
 		
 		do {
 			System.out.println("1. Add Game\n"+
@@ -104,10 +112,40 @@ public class MainApp {
 
 			selection = input.nextInt();
 		
+			if(selection == 2) {
+				
+				System.out.println("Choose a game:");
+				
+				try 
+				{
+					ResultSet rs = stmt.executeQuery("select * from Games");
+					int gameNum = 0;
+					
+					//list the games and keep track of them for player selection
+					while(rs.next())
+					{
+						gameNum++;
+						gameName = rs.getString("name");
+						System.out.println(gameNum + ". " + gameName);
+						gameList.add(gameName);
+					}
+					
+				} catch (SQLException e) {
+					
+					e.printStackTrace();
+				}
+
+				gameName = gameList.get(input.nextInt()-1);
+				timer(gameName);
+				
+			}
 			
 		} while (selection != 3);
 		
 		input.close();
 	}
 
+	//starts and stops the timer
+	public static void timer(String gameName) {}
+	
 }
